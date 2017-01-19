@@ -8,6 +8,7 @@ module Torture
     def self.for(input, marker:, hide:nil)
       code = nil
       ignore = false
+      indent = 0
 
       input.each_line do |ln|
         break if ln =~ /\#:#{marker} end/
@@ -25,14 +26,26 @@ module Torture
         next if ignore
         next if ln =~ /#~/
 
-        code << ln and next unless code.nil?
-        code = "" if ln =~ /\#:#{marker}$/ # beginning of our section.
+
+
+        code << Indent(Trim(ln, indent)) and next unless code.nil?
+        if ln =~ /\#:#{marker}$/ # beginning of our section.
+          code   = ""
+          indent = ln.match(/(^\s+)/) { |m| m[0].size } || 0
+        end
       end
 
-      indented = ""
-      code.each_line { |ln| indented << "  "+ln }
+      Kramdown::Document.new(code).to_html
+      # %{<pre><code>#{code}</code></pre>\n}
+    end
 
-      Kramdown::Document.new(indented).to_html
+    def self.Trim(line, count, do_trim=true)
+      return line unless do_trim || count
+      line[count..-1] || "\n"
+    end
+
+    def self.Indent(line, count=4)
+      " "*count + line
     end
   end
 end

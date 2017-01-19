@@ -11,6 +11,7 @@ class SnippetTest < Minitest::Spec
 
   #:op-op
     ops
+
     *are*
   #:op-op end
 }
@@ -18,10 +19,28 @@ class SnippetTest < Minitest::Spec
 
   it do
     Torture::Snippet.for(txt, marker: "op-op").must_equal %{<pre><code>  ops
+
   *are*
 </code></pre>
 }
   end
+
+  # not indented code
+let (:notindented) { %{
+#:op-op
+code
+  not
+really indented
+#:op-op end
+} }
+it do
+    Torture::Snippet.for(notindented, marker: "op-op").must_equal %{<pre><code>code
+  not
+really indented
+</code></pre>
+}
+  end
+
 
   it do
     Torture::Snippet.call(file: "test/fixtures/operation_test.rb", marker: "invocation-dep").must_equal %{<pre><code>class Create &lt; Trailblazer::Operation

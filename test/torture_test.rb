@@ -13,9 +13,7 @@ class TortureTest < Minitest::Spec
 
     html = %{<section class=" ">
   <div class="row">
-    <div class="column medium-4 offset-2">
-
-
+    <div class="column medium-4 offset-2">\n        \n
       </div>
     <div class="column medium-3 ">
         <p>first</p>
