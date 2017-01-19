@@ -13,12 +13,38 @@ class SnippetTest < Minitest::Spec
     ops
 
     *are*
+    #..
   #:op-op end
 }
   }
 
   it do
     Torture::Snippet.for(txt, marker: "op-op").must_equal %{<pre><code>  ops
+
+  *are*
+  #..
+</code></pre>
+}
+  end
+
+  # with hide
+  let (:with_hide) {
+%{
+ ignore
+  #:op-op
+    Bla
+    #~bla
+    ops
+    #~bla end
+
+    *are*
+  #:op-op end
+}
+  }
+
+  it do
+    Torture::Snippet.for(with_hide, marker: "op-op", hide: "bla").must_equal %{<pre><code>  Bla
+  # ...
 
   *are*
 </code></pre>

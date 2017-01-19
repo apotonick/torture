@@ -15,7 +15,7 @@ module Torture
 
         if ln =~ /#~#{hide}$/
           ignore = true
-          code << ln.sub("#~#{hide}", "# ...")
+          code << Indent(Trim(ln.sub("#~#{hide}", "# ..."), indent)) # TODO: fix redundancy.
         end
 
         if ln =~ /#~#{hide} end/
