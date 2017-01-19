@@ -1,13 +1,8 @@
 module Torture
   module Snippet
-    def call(input, hide=nil)
-      file, section = input.split(":")
-
-      file = "../trailblazer/test/docs/#{file}" unless file.match("/")
-
-      code = nil
-      ignore = false
-
+    def self.call(file:, root: "./", **kws)
+      input = File.open(File.join(root, file))
+      self.for(input, **kws)
     end
 
     def self.for(input, marker:, hide:nil)

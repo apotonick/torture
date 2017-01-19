@@ -22,4 +22,30 @@ class SnippetTest < Minitest::Spec
 </code></pre>
 }
   end
+
+  it do
+    Torture::Snippet.call(file: "test/fixtures/operation_test.rb", marker: "invocation-dep").must_equal %{<pre><code>class Create &lt; Trailblazer::Operation
+  step     Model( Song, :new )
+  step     :assign_current_user!
+  # ..
+  def assign_current_user!(options)
+    options[\"model\"].created_by = options[\"current_user\"]
+  end
+end
+</code></pre>
+}
+  end
+
+  it do
+    Torture::Snippet.call(file: "operation_test.rb", root: "test/fixtures", marker: "invocation-dep").must_equal %{<pre><code>class Create &lt; Trailblazer::Operation
+  step     Model( Song, :new )
+  step     :assign_current_user!
+  # ..
+  def assign_current_user!(options)
+    options[\"model\"].created_by = options[\"current_user\"]
+  end
+end
+</code></pre>
+}
+  end
 end
