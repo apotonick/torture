@@ -1,6 +1,7 @@
 module Torture
   module Snippet
     def self.call(file:, root: "./", **kws)
+
       input = File.open(File.join(root, file))
       self.for(input, **kws)
     end
@@ -25,6 +26,7 @@ module Torture
 
         next if ignore
         next if ln =~ /#~/
+        next if ln =~ /#:/ && code
 
 
 

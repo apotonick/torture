@@ -52,14 +52,14 @@ class SnippetTest < Minitest::Spec
   end
 
   # not indented code
-let (:notindented) { %{
+  let (:notindented) { %{
 #:op-op
 code
   not
 really indented
 #:op-op end
 } }
-it do
+  it do
     Torture::Snippet.for(notindented, marker: "op-op").must_equal %{<pre><code>code
   not
 really indented
@@ -67,7 +67,26 @@ really indented
 }
   end
 
+  #:marker in :marker
+  let (:marker_in_marker) { %{#:marker
+  bla
+  #:inside
+  blub
+  #:inside end
+  more bla
+  #:marker end
+   }
+  }
 
+  it do
+    Torture::Snippet.for(marker_in_marker, marker: "marker").must_equal %{<pre><code>  bla
+  blub
+  more bla
+</code></pre>
+}
+  end
+
+  # ::call
   it do
     Torture::Snippet.call(file: "test/fixtures/operation_test.rb", marker: "invocation-dep").must_equal %{<pre><code>class Create &lt; Trailblazer::Operation
   step     Model( Song, :new )
@@ -93,4 +112,7 @@ end
 </code></pre>
 }
   end
+
 end
+
+#TODO: test when marker non-existent
