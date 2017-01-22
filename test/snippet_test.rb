@@ -86,6 +86,10 @@ really indented
 }
   end
 
+  # missing :marker
+
+  it { assert_raises(RuntimeError) { Torture::Snippet.for("\nbla\n", marker: "marker") }  }
+
   # ::call
   it do
     Torture::Snippet.call(file: "test/fixtures/operation_test.rb", marker: "invocation-dep").must_equal %{<pre><code>class Create &lt; Trailblazer::Operation

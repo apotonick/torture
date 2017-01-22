@@ -1,7 +1,6 @@
 module Torture
   module Snippet
     def self.call(file:, root: "./", **kws)
-
       input = File.open(File.join(root, file))
       self.for(input, **kws)
     end
@@ -36,6 +35,8 @@ module Torture
           indent = ln.match(/(^\s+)/) { |m| m[0].size } || 0
         end
       end
+
+      raise "Couldn't find #{marker}" unless code
 
       Kramdown::Document.new(code).to_html
       # %{<pre><code>#{code}</code></pre>\n}
