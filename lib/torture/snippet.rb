@@ -5,7 +5,14 @@ module Torture
       self.for(input, **kws)
     end
 
-    def self.for(input, marker:, hide:nil)
+    def self.for(input, **kws)
+      code = extract(input, **kws)
+
+      Kramdown::Document.new(code).to_html
+      # %{<pre><code>#{code}</code></pre>\n}
+    end
+
+    def self.extract(input, marker:, hide:nil)
       code = nil
       ignore = false
       indent = 0
@@ -38,8 +45,7 @@ module Torture
 
       raise "Couldn't find #{marker}" unless code
 
-      Kramdown::Document.new(code).to_html
-      # %{<pre><code>#{code}</code></pre>\n}
+      code
     end
 
     def self.Trim(line, count, do_trim=true)
