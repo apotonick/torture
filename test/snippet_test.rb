@@ -137,6 +137,7 @@ bla
     four
     4
       five
+
    end
    #:three end
 more
@@ -147,6 +148,7 @@ three%spaces%in
 %four
 %4
 %%%five
+
 end
 }
     end

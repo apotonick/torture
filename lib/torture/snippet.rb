@@ -42,7 +42,6 @@ module Torture
         next if ln =~ /#:/ && code
 
 
-
         code << ln and next unless code.nil?
 
         if ln =~ /\#:#{marker}$/ # beginning of our section.
@@ -54,6 +53,8 @@ module Torture
       raise "Couldn't find #{marker}" unless code
 
       code = unindent(code, indent) if unindent == true
+puts
+puts code
 
       code
     end
@@ -92,8 +93,6 @@ module Torture
 
       raise "Couldn't find #{marker}" unless code
 
-      code = unindent(code, indent) if unindent == true
-
       code
     end
 
@@ -110,7 +109,7 @@ module Torture
 
     # Strip {indent} characters of whitespace from each line beginning.
     def self.unindent(code, indent)
-      code.gsub(/^\s{#{indent}}/, "")
+      code.gsub(/^ {#{indent}}/, "")
     end
   end
 end
