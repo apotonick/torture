@@ -1,0 +1,1 @@
+Allow tsnippet strip: /%{/,/}/
