@@ -12,6 +12,11 @@ module Torture
       # %{<pre><code>#{code}</code></pre>\n}
     end
 
+    def self.extract_from(file:, root:, **kws)
+      input = File.open(File.join(root, file))
+      self.extract(input, **kws)
+    end
+
     def self.extract(input, marker:, hide:nil)
       code = nil
       ignore = false

@@ -117,6 +117,22 @@ end
 }
   end
 
+
+  describe "Snippet.extract" do
+    it "returns the extracted code, only" do
+
+      assert_snippet Torture::Snippet.extract(txt, marker: "op-op"), %{
+%%%%%%ops
+%%%%
+%%%%%%*are*
+%%%%%%#..
+}
+    end
+  end
+
+  def assert_snippet(actual, expected)
+    actual.gsub(" ","%").must_equal(expected.sub(/^\n/, ""))
+  end
 end
 
 #TODO: test when marker non-existent
