@@ -5,6 +5,8 @@ module Torture
       self.for(input, **kws)
     end
 
+
+    # TODO: remove me!
     def self.for(input, **kws)
       code = extract(input, **kws)
 
@@ -14,10 +16,50 @@ module Torture
 
     def self.extract_from(file:, root:, **kws)
       input = File.open(File.join(root, file))
-      self.extract(input, **kws)
+      self.new_extract(input, **kws)
     end
 
-    def self.extract(input, marker:, hide:nil)
+    def self.new_extract(input, marker:, hide:nil, unindent:false)
+      code = nil
+      ignore = false
+      indent = 0
+
+      input.each_line do |ln|
+        break if ln =~ /\#:#{marker} end/
+
+        if ln =~ /#~#{hide}$/
+          ignore = true
+          code << ln.sub("#~#{hide}", "# ...")
+        end
+
+        if ln =~ /#~#{hide} end/
+          ignore = false
+          next
+        end
+
+        next if ignore
+        next if ln =~ /#~/
+        next if ln =~ /#:/ && code
+
+
+
+        code << ln and next unless code.nil?
+
+        if ln =~ /\#:#{marker}$/ # beginning of our section.
+          code   = ""
+          indent = ln.match(/(^\s+)/) { |m| m[0].size } || 0
+        end
+      end
+
+      raise "Couldn't find #{marker}" unless code
+
+      code = unindent(code, indent) if unindent == true
+
+      code
+    end
+
+    # TODO: remove me!
+    def self.extract(input, marker:, hide:nil, unindent:false)
       code = nil
       ignore = false
       indent = 0
@@ -50,16 +92,25 @@ module Torture
 
       raise "Couldn't find #{marker}" unless code
 
+      code = unindent(code, indent) if unindent == true
+
       code
     end
 
+    # TODO: remove me!
     def self.Trim(line, count, do_trim=true)
       return line unless do_trim || count
       line[count..-1] || "\n"
     end
 
+    # TODO: remove me!
     def self.Indent(line, count=4)
       " "*count + line
+    end
+
+    # Strip {indent} characters of whitespace from each line beginning.
+    def self.unindent(code, indent)
+      code.gsub(/^\s{#{indent}}/, "")
     end
   end
 end

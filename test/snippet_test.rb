@@ -128,6 +128,28 @@ end
 %%%%%%#..
 }
     end
+
+    it "accepts unindent: true" do
+      txt = %{
+bla
+   #:three
+   three spaces in
+    four
+    4
+      five
+   end
+   #:three end
+more
+}
+
+      assert_snippet Torture::Snippet.new_extract(txt, marker: "three", unindent: true), %{
+three%spaces%in
+%four
+%4
+%%%five
+end
+}
+    end
   end
 
   def assert_snippet(actual, expected)
