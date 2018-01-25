@@ -53,8 +53,6 @@ module Torture
       raise "Couldn't find #{marker}" unless code
 
       code = unindent(code, indent) if unindent == true
-puts
-puts code
 
       code
     end
