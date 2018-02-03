@@ -154,6 +154,54 @@ end
     end
   end
 
+  it "allows the same-named #~hide block in different sections" do
+    txt = %{
+  #:update
+  update{
+    #~skip
+      update skip
+    #~skip end
+  } #update
+  #:update end
+
+  #:create
+  create{
+    #~skip
+      create skip
+    #~skip end
+  } #create
+  #:create end
+}
+    assert_snippet Torture::Snippet.new_extract(txt, marker: "update", collapse: :skip), %{
+%%update{
+%%%%#%...
+%%}%#update
+}
+    assert_snippet Torture::Snippet.new_extract(txt, marker: "create", collapse: :skip), %{
+%%create{
+%%%%#%...
+%%}%#create
+}
+  end
+
+  it "allows passing :hide without actual #~hide block" do
+    txt = %{
+a
+  #:update
+  update{
+      update content
+  } #update
+  #:update end
+
+b
+}
+    assert_snippet Torture::Snippet.new_extract(txt, marker: "update", collapse: :skip), %{
+%%update{
+%%%%%%update%content
+%%}%#update
+}
+  end
+
   def assert_snippet(actual, expected)
     actual.gsub(" ","%").must_equal(expected.sub(/^\n/, ""))
   end
