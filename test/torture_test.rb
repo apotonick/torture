@@ -1,5 +1,4 @@
 require "test_helper"
-require "test_xml/mini_test"
 
 class TortureTest < Minitest::Spec
   it do
