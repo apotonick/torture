@@ -202,6 +202,18 @@ b
 }
   end
 
+
+  it "returns the line number and link is fine" do
+    path_and_line = Torture::Snippet.extract_line_number_and_filename_from(file: "operation_test.rb", root: "test/fixtures",  marker: "invocation-dep")
+    assert_equal path_and_line, {path: "test/fixtures/operation_test.rb", line: 10}
+
+    link = "https://github.com/apotonick/torture/blob/master/test/fixtures/operation_test.rb#L10"
+    assert_equal Torture::Snippet.build_github_link(github_user: 'apotonick', gem_name: 'torture', path: path_and_line[:path], line_number: path_and_line[:line] ), link
+  end
+
+
+
+
   def assert_snippet(actual, expected)
     actual.gsub(" ","%").must_equal(expected.sub(/^\n/, ""))
   end
