@@ -1,6 +1,4 @@
-require "test_helper"
-require "test_xml/mini_test"
-
+require 'test_helper'
 class TortureTest < Minitest::Spec
   it do
     md = %{
@@ -27,7 +25,7 @@ class TortureTest < Minitest::Spec
       </div>
 </div></section>}
 
-puts Torture::Foundation6::Row.new.(md)
+    #puts Torture::Foundation6::Row.new.(md)
 
     Torture::Foundation6::Row.new.(md).must_equal html
   end

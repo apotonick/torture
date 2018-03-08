@@ -19,6 +19,29 @@ module Torture
       self.new_extract(input, **kws)
     end
 
+    # Adding link to Github functionality
+    def self.extract_line_number_and_filename_from(file:, root: "./", **kws)
+      input = File.open(File.join(root, file))
+      line_number = self.extract_line_number(input, **kws)
+
+      return {path: File.join(root, file), line: line_number}
+    end
+
+    def self.extract_line_number(input, marker:)
+      line_number = nil
+      input.each_with_index do |ln, index|
+        # beginning of our section?
+        if  beginning_of_section?(ln, marker)
+          line_number = index + 2
+        end
+      end
+      return line_number
+    end
+
+    def self.build_github_link(github_user: 'trailblazer', gem_name:, branch: 'master', path: , line_number: )
+      "https://github.com/#{github_user}/#{gem_name}/blob/#{branch}/#{path}#L#{line_number}"
+    end
+
     # @param :collapse name of the #~collapse marker that will be displayed as `# ...`.
     def self.new_extract(input, marker:, collapse:nil, unindent:false)
       code = nil     # also acts as a flag if we're within our section.
@@ -27,10 +50,10 @@ module Torture
 
       input.each_line do |ln|
         # end of our section?
-        break if ln =~ /\#:#{marker} end/
+        break if end_of_section?(ln, marker)
 
         # beginning of our section?
-        if ln =~ /\#:#{marker}$/
+        if  beginning_of_section?(ln, marker)
           code   = ""
           indent = ln.match(/(^\s+)/) { |m| m[0].size } || 0
         end
@@ -112,5 +135,15 @@ module Torture
     def self.unindent(code, indent)
       code.gsub(/^ {#{indent}}/, "")
     end
+
+    def self.end_of_section?(line, marker)
+      (line =~ /\#:#{marker} end/) ? true : false
+    end
+    def self.beginning_of_section?(line, marker)
+      (line =~ /\#:#{marker}$/) ? true : false
+    end
+
+
+
   end
 end
