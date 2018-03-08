@@ -38,8 +38,8 @@ module Torture
       return line_number
     end
 
-    def self.build_github_link(github_user: 'trailblazer', gem_name:, path: , line_number: )
-      "https://github.com/#{github_user}/#{gem_name}/blob/master/#{path}#L#{line_number}"
+    def self.build_github_link(github_user: 'trailblazer', gem_name:, branch: 'master', path: , line_number: )
+      "https://github.com/#{github_user}/#{gem_name}/blob/#{branch}/#{path}#L#{line_number}"
     end
 
     # @param :collapse name of the #~collapse marker that will be displayed as `# ...`.
