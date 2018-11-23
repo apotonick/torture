@@ -1,6 +1,6 @@
 require "test_helper"
 
-class SnippetTest < Minitest::Spec
+class SnippetExtractTest < Minitest::Spec
   let (:txt) {
 %{
  ignore
@@ -18,119 +18,33 @@ class SnippetTest < Minitest::Spec
 }
   }
 
-  it do
-    Torture::Snippet.for(txt, marker: "op-op").must_equal %{<pre><code>  ops
+  it "returns extracted code with its original indent" do
+    assert_snippet Torture::Snippet.extract(txt, marker: "op-op"), %{
+%%%%ops
 
-  *are*
-  #..
-</code></pre>
+%%%%*are*
+%%%%#..
 }
   end
 
-  # with hide
-  let (:with_hide) {
-%{
- ignore
-  #:op-op
-    Bla
-    #~bla
-    ops
-    #~bla end
-
-    *are*
-  #:op-op end
-}
-  }
-
-  it do
-    Torture::Snippet.for(with_hide, marker: "op-op", hide: "bla").must_equal %{<pre><code>  Bla
-  # ...
-
-  *are*
-</code></pre>
-}
-  end
-
-  # not indented code
-  let (:notindented) { %{
+  it "not indented code" do
+    txt = %{
 #:op-op
 code
   not
 really indented
 #:op-op end
-} }
-  it do
-    Torture::Snippet.for(notindented, marker: "op-op").must_equal %{<pre><code>code
-  not
-really indented
-</code></pre>
+}
+
+    assert_snippet Torture::Snippet.extract(txt, marker: "op-op"), %{
+code
+%%not
+really%indented
 }
   end
 
-  #:marker in :marker
-  let (:marker_in_marker) { %{#:marker
-  bla
-  #:inside
-  blub
-  #:inside end
-  more bla
-  #:marker end
-   }
-  }
-
-  it do
-    Torture::Snippet.for(marker_in_marker, marker: "marker").must_equal %{<pre><code>  bla
-  blub
-  more bla
-</code></pre>
-}
-  end
-
-  # missing :marker
-
-  it { assert_raises(RuntimeError) { Torture::Snippet.for("\nbla\n", marker: "marker") }  }
-
-  # ::call
-  it do
-    Torture::Snippet.call(file: "test/fixtures/operation_test.rb", marker: "invocation-dep").must_equal %{<pre><code>class Create &lt; Trailblazer::Operation
-  step     Model( Song, :new )
-  step     :assign_current_user!
-  # ..
-  def assign_current_user!(options)
-    options[\"model\"].created_by = options[\"current_user\"]
-  end
-end
-</code></pre>
-}
-  end
-
-  it do
-    Torture::Snippet.call(file: "operation_test.rb", root: "test/fixtures", marker: "invocation-dep").must_equal %{<pre><code>class Create &lt; Trailblazer::Operation
-  step     Model( Song, :new )
-  step     :assign_current_user!
-  # ..
-  def assign_current_user!(options)
-    options[\"model\"].created_by = options[\"current_user\"]
-  end
-end
-</code></pre>
-}
-  end
-
-
-  describe "Snippet.extract" do
-    it "returns the extracted code, only" do
-
-      assert_snippet Torture::Snippet.extract(txt, marker: "op-op"), %{
-%%%%%%ops
-%%%%
-%%%%%%*are*
-%%%%%%#..
-}
-    end
-
-    it "accepts unindent: true" do
-      txt = %{
+  it "accepts unindent: true" do
+    txt = %{
 bla
    #:three
    three spaces in
@@ -143,7 +57,7 @@ bla
 more
 }
 
-      assert_snippet Torture::Snippet.new_extract(txt, marker: "three", unindent: true), %{
+    assert_snippet Torture::Snippet.extract(txt, marker: "three", unindent: true), %{
 three%spaces%in
 %four
 %4
@@ -151,7 +65,26 @@ three%spaces%in
 
 end
 }
-    end
+  end
+
+  it ":collapse" do
+    txt = %{
+   ignore
+    #:op-op
+      Bla
+      #~bla
+      ops
+      #~bla end
+
+      *are*
+    #:op-op end
+  }
+    assert_snippet Torture::Snippet.extract(txt, marker: "op-op", collapse: "bla"), %{
+%%%%%%Bla
+%%%%%%#%...
+
+%%%%%%*are*
+}
   end
 
   it "allows the same-named #~hide block in different sections" do
@@ -172,12 +105,12 @@ end
   } #create
   #:create end
 }
-    assert_snippet Torture::Snippet.new_extract(txt, marker: "update", collapse: :skip), %{
+    assert_snippet Torture::Snippet.extract(txt, marker: "update", collapse: :skip), %{
 %%update{
 %%%%#%...
 %%}%#update
 }
-    assert_snippet Torture::Snippet.new_extract(txt, marker: "create", collapse: :skip), %{
+    assert_snippet Torture::Snippet.extract(txt, marker: "create", collapse: :skip), %{
 %%create{
 %%%%#%...
 %%}%#create
@@ -195,16 +128,49 @@ a
 
 b
 }
-    assert_snippet Torture::Snippet.new_extract(txt, marker: "update", collapse: :skip), %{
+    assert_snippet Torture::Snippet.extract(txt, marker: "update", collapse: :skip), %{
 %%update{
 %%%%%%update%content
 %%}%#update
 }
   end
 
+  it ":marker in :marker" do
+    txt = %{#:marker
+  bla
+  #:inside
+  blub
+  #:inside end
+  more bla
+  #:marker end
+}
+
+  assert_snippet Torture::Snippet.extract(txt, marker: "marker"), %{
+%%bla
+%%blub
+%%more%bla
+}
+  end
+
+  # missing :marker
+  it { assert_raises(RuntimeError) { Torture::Snippet.extract("\nbla\n", marker: "marker") }  }
+
   def assert_snippet(actual, expected)
     actual.gsub(" ","%").must_equal(expected.sub(/^\n/, ""))
   end
 end
 
-#TODO: test when marker non-existent
+
+class SnippetExtractFromTest < Minitest::Spec
+  it do
+    Torture::Snippet.extract_from(file: "test/fixtures/operation_test.rb", marker: "invocation-dep", unindent: true).must_equal %{class Create < Trailblazer::Operation
+  step     Model( Song, :new )
+  step     :assign_current_user!
+  # ..
+  def assign_current_user!(options)
+    options[\"model\"].created_by = options[\"current_user\"]
+  end
+end
+}
+  end
+end
