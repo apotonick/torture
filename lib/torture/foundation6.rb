@@ -1,4 +1,4 @@
-require "kramdown"
+# require "kramdown"
 
 module Torture
   module Foundation6
