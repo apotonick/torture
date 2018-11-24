@@ -67,7 +67,7 @@ end
 }
   end
 
-  it ":collapse" do
+  it ":collapse substitutes a section with #..." do
     txt = %{
    ignore
     #:op-op
@@ -87,7 +87,7 @@ end
 }
   end
 
-  it "allows the same-named #~hide block in different sections" do
+  it "allows the same-named #~collapse block in different sections" do
     txt = %{
   #:update
   update{
@@ -117,7 +117,7 @@ end
 }
   end
 
-  it "allows passing :hide without actual #~hide block" do
+  it "allows passing :collapse without actual #~collapse block" do
     txt = %{
 a
   #:update
