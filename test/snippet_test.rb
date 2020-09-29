@@ -152,6 +152,17 @@ b
 }
   end
 
+  it "prepends :filename when given" do
+    assert_snippet Torture::Snippet.extract(txt, marker: "op-op", filename: "app/controller/songs_controller.rb"), %{
+#%app/controller/songs_controller.rb
+
+%%%%ops
+
+%%%%*are*
+%%%%#..
+}
+  end
+
   # missing :marker
   it { assert_raises(RuntimeError) { Torture::Snippet.extract("\nbla\n", marker: "marker") }  }
 
