@@ -155,6 +155,17 @@ b
   # missing :marker
   it { assert_raises(RuntimeError) { Torture::Snippet.extract("\nbla\n", marker: "marker") }  }
 
+  it "{:sub} option allows removing a substring" do
+      txt = %{yo
+  #:update
+  Operation.call(params: {}, seq: [])
+  #:update end
+}
+    assert_snippet Torture::Snippet.extract(txt, marker: "update", sub: ", seq: []"), %{
+%%Operation.call(params:%{})
+}
+  end
+
   def assert_snippet(actual, expected)
     actual.gsub(" ","%").must_equal(expected.sub(/^\n/, ""))
   end

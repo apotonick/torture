@@ -6,7 +6,7 @@ module Torture
     end
 
     # @param :collapse name of the #~collapse marker that will be displayed as `# ...`.
-    def self.extract(input, marker:, collapse:nil, unindent:false)
+    def self.extract(input, marker:, collapse:nil, unindent:false, sub: nil)
       code = nil     # also acts as a flag if we're within our section.
       ignore = false
       indent = 0
@@ -42,6 +42,7 @@ module Torture
       raise "Couldn't find #{marker}" unless code
 
       code = unindent(code, indent) if unindent == true
+      code = sub(code, sub) if sub
 
       code
     end
@@ -49,6 +50,10 @@ module Torture
     # Strip {indent} characters of whitespace from each line beginning.
     def self.unindent(code, indent)
       code.gsub(/^ {#{indent}}/, "")
+    end
+
+    def self.sub(code, sub)
+      code.sub(sub, "")
     end
   end
 end
