@@ -11,6 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{Tool collection to write and layout programmer's manuals.}
   spec.description   = %q{Tool collection to write and layout programmer's manuals.}
   spec.homepage      = "https://github.com/apotonick/torture"
+  spec.license       = "LGPL-3.0"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = "exe"
