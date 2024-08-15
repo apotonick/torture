@@ -87,6 +87,30 @@ end
 }
   end
 
+  it ":collapse can hide several blocks with the same name in one marker section" do
+    txt = %{
+   ignore
+    #:op-op
+      Bla
+      #~bla
+      ops
+      #~bla end
+      blubb
+      #~bla
+      more bla
+      #~bla end
+      *are*
+    #:op-op end
+  }
+    assert_snippet Torture::Snippet.extract(txt, marker: "op-op", collapse: "bla"), %{
+%%%%%%Bla
+%%%%%%#%...
+%%%%%%blubb
+%%%%%%#%...
+%%%%%%*are*
+}
+  end
+
   it "allows the same-named #~collapse block in different sections" do
     txt = %{
   #:update
