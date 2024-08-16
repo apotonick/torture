@@ -6,45 +6,94 @@ module Torture
     end
 
     # @param :collapse name of the #~collapse marker that will be displayed as `# ...`.
-    def self.extract(input, marker:, collapse:nil, unindent:false, sub: nil)
-      code = nil     # also acts as a flag if we're within our section.
-      ignore = false
-      indent = 0
+    def self.extract(input, marker:, collapse:nil, unindent:false, sub: nil, zoom: nil)
+      input_lines = input.each_line.to_a
 
-      input.each_line do |ln|
-        # end of our section?
-        break if ln =~ /\#:#{marker} end/
+      content_lines, first_line = extract_marker_section(input_lines, marker: marker)
+      raise "Couldn't find #{marker}" unless first_line
 
-        # beginning of our section?
-        if ln =~ /\#:#{marker}$/
-          code   = ""
-          indent = ln.match(/(^\s+)/) { |m| m[0].size } || 0
-        end
+      indent = first_line.match(/(^\s+)/) { |m| m[0].size } || 0 # FIXME: what if there's no first line?
 
-        next if code.nil? # not in our section.
-
-        if ln =~ /#~#{collapse}$/
-          ignore = true
-          code << ln.sub("#~#{collapse}", "# ...")
-        end
-
-        if ln =~ /#~#{collapse} end/
-          ignore = false
-          next
-        end
-
-        next if ignore
-        next if ln =~ /#~/
-        next if ln =~ /#:/
-        code << ln and next
+      if zoom
+        content_lines = zoom(content_lines, zoom: zoom)
       end
 
-      raise "Couldn't find #{marker}" unless code
+      if collapse
+        count = content_lines.find_all { |ln| ln =~ /\#~#{collapse}$/ }.size # FIXME: hm, this is private.
+
+        count.times do
+          content_lines = collapse(content_lines, collapse: collapse)
+        end
+      end
+
+      # remove foreign delimiters
+      content_lines = content_lines.reject { |ln| ln =~ /#~/ }
+      content_lines = content_lines.reject { |ln| ln =~ /#:/ }
+
+      code = content_lines.join("")
 
       code = unindent(code, indent) if unindent == true
       code = sub(code, sub) if sub
 
       code
+    end
+
+    def self.detect_marker_section(input, delimiter:)
+      start_i, stop_i = nil, nil
+
+      input.each.with_index do |ln, i|
+        # end of our section?
+        if ln =~ /\##{delimiter} end/
+          stop_i = i
+          break
+        end
+
+        # beginning of our section?
+        if ln =~ /\##{delimiter}$/
+          start_i = i
+        end
+      end
+
+      [start_i, stop_i]
+    end
+
+    def self.extract_marker_section(input, marker:, delimiter: ":#{marker}")
+      start_i, stop_i = detect_marker_section(input, delimiter: delimiter)
+      return if start_i.nil?
+
+      marker_section = input[start_i + 1..stop_i - 1]
+
+      return marker_section, input[start_i]
+    end
+
+    def self.marker_to_dotdotdot(line, delimiter:)
+      line.sub("##{delimiter}", "# ...")
+    end
+
+    def self.zoom(input, zoom:, zoom_frame: [0..0, -1..-1])
+      delimiter = "~#{zoom}"
+      zoomed_section, first_line = extract_marker_section(input, marker: nil, delimiter: delimiter)
+
+      before_range, after_range = zoom_frame # DISCUSS: do we need that?
+
+      content = []
+      content += input[before_range]
+      content << dotdotdot = marker_to_dotdotdot(first_line, delimiter: delimiter)
+      content += zoomed_section
+      content << dotdotdot
+      content += input[after_range]
+
+      content
+    end
+
+    def self.collapse(input, collapse:)
+      delimiter = "~#{collapse}"
+
+      start_i, stop_i = detect_marker_section(input, delimiter: delimiter)
+
+      content = input[0..start_i - 1]
+      content << marker_to_dotdotdot(input[start_i], delimiter: delimiter)
+      content += input[stop_i + 1..-1]
     end
 
     # Strip {indent} characters of whitespace from each line beginning.

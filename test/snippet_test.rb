@@ -159,6 +159,38 @@ b
 }
   end
 
+  it "zoom: opposite of collapse" do
+    txt = %(
+Header
+#:controller
+class MyController
+  endpoint Create
+
+  bla
+  blubb
+  #~directive
+  this
+  is important
+  #~directive end
+
+  more chatter
+
+  and bantering
+end
+#:controller end
+and crap
+)
+# TODO: zoom_lines: [0, 1, -1]
+    assert_snippet Torture::Snippet.extract(txt, marker: "controller", zoom: "directive"), %{
+class%MyController
+%%#%...
+%%this
+%%is%important
+%%#%...
+end
+}
+  end
+
   it ":marker in :marker" do
     txt = %{#:marker
   bla
