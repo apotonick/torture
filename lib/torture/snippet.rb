@@ -91,7 +91,14 @@ module Torture
 
       start_i, stop_i = detect_marker_section(input, delimiter: delimiter)
 
-      content = input[0..start_i - 1]
+
+      content = if start_i == 0
+          [] # if the #~skip start is index == 0, don't collect anything "before" (because there isn't anything).
+          # TODO: is there a Ruby idiom for this?
+        else
+          input[0..start_i - 1]
+        end
+
       content << marker_to_dotdotdot(input[start_i], delimiter: delimiter)
       content += input[stop_i + 1..-1]
     end

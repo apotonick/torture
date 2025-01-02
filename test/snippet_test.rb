@@ -159,6 +159,22 @@ b
 }
   end
 
+  it "collapsed block can sit right after the actual marker" do
+    txt = %{
+   ignore
+    #:op-op
+      #~skip
+      Bla
+      #~skip end
+      ops
+    #:op-op end
+  }
+    assert_snippet Torture::Snippet.extract(txt, marker: "op-op", collapse: "skip"), %{
+%%%%%%#%...
+%%%%%%ops
+}
+  end
+
   it "zoom: opposite of collapse" do
     txt = %(
 Header
